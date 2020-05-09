@@ -1,1 +1,2 @@
-https://github.com/avanov/typeit/archive/master.zip#egg=typeit
+typeit>=0.27.1
+infix==1.2
