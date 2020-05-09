@@ -1,0 +1,20 @@
+---
+dist: xenial
+sudo: false
+language: python
+cache: pip
+
+install:
+  - pip install -r ./requirements/test.txt
+  - pip install coveralls
+  - pip install -e ./
+python:
+  - "3.7"
+  - "3.8"
+
+# --source specifies what packages to cover, you probably want to use that option
+script:
+    # - make typecheck
+    - pytest --cov=graphql_dsl
+
+after_success: coveralls

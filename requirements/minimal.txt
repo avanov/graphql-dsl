@@ -1,0 +1,1 @@
+https://github.com/avanov/typeit/archive/master.zip#egg=typeit

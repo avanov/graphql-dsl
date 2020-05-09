@@ -1,0 +1,6 @@
+# https://docs.python.org/3/distutils/sourcedist.html#manifest
+include README.rst CHANGES.rst LICENSE
+recursive-include requirements *.txt
+recursive-include graphql_dsl
+exclude requirements/test.txt
+prune tests
