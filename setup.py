@@ -21,7 +21,7 @@ with (HERE / 'requirements' / 'minimal.txt').open() as f:
 # ----------------------------
 
 setup(name='graphql-dsl',
-      version='0.1.2',
+      version='0.1.3',
       description='GraphQL DSL',
       long_description=README,
       classifiers=[
@@ -33,10 +33,17 @@ setup(name='graphql-dsl',
           'Programming Language :: Python :: 3',
           'Operating System :: POSIX',
           'Topic :: Internet :: WWW/HTTP',
+          'Topic :: Software Development :: Libraries',
+          'Topic :: Software Development :: Code Generators',
+          'Typing :: Typed',
       ],
       author='Maxim Avanov',
       author_email='maxim.avanov@gmail.com',
       url='https://maximavanov.com/',
+      project_urls={
+          'Documentation': 'https://graphql-dsl.rtfd.io/',
+          'Source': 'https://github.com/avanov/graphql-dsl',
+      },
       keywords='web',
       packages=find_packages(exclude=['tests', 'tests.*']),
       include_package_data=True,

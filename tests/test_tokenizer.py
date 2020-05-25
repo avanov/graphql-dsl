@@ -23,9 +23,6 @@ def test_tokenizer():
     class CountriesQuery(NamedTuple):
         countries: Sequence[Country]
 
-
-    mk_countries_query, dict_countries_query = GQL.typer ^ CountriesQuery
-
     q = QUERY | CountriesQuery
 
     graphql_query = GQL(q)
@@ -36,20 +33,19 @@ def test_tokenizer():
         response = requests.post(
             url='https://countries.trevorblades.com/',
             json={
-                "operationName": f"{CountriesQuery.__name__}",
+                "operationName": graphql_query.name,
                 "variables": {},
                 "query": graphql_query.query,
             },
             headers={
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Origin': 'https://countries.trevorblades.com',
             }
         )
     response.raise_for_status()
-    data = response.json()['data']
+    data = response.json()
     assert data
-    typed_data = mk_countries_query(data)
+    typed_data = graphql_query.get_result(data)
     assert isinstance(typed_data, CountriesQuery)
 
 
@@ -161,10 +157,10 @@ def test_mutation():
     class CreateReviewForEpisode(NamedTuple):
         create_review: Review
 
-    q = GQL(MUTATION | CreateReviewForEpisode
-           |    WITH | Input3
-           |    PASS | Input3.episode * TO * CreateReviewForEpisode.create_review
-                     & Input3.review  * TO * CreateReviewForEpisode.create_review
-           )
+    q = GQL( MUTATE | CreateReviewForEpisode
+           |   WITH | Input3
+           |   PASS | Input3.episode * TO * CreateReviewForEpisode.create_review
+                    & Input3.review  * TO * CreateReviewForEpisode.create_review )
+
     expected = 'mutation CreateReviewForEpisode($episode:Episode!,$review:Review!){createReview(episode:$episode,review:$review){stars commentary}}'
     assert q.query == expected
