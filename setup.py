@@ -21,7 +21,7 @@ with (HERE / 'requirements' / 'minimal.txt').open() as f:
 # ----------------------------
 
 setup(name='graphql-dsl',
-      version='0.0.1',
+      version='0.1.1',
       description='GraphQL DSL',
       long_description=README,
       classifiers=[
