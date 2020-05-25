@@ -22,7 +22,7 @@ __all__ = (
     'PASS',
     'TO',
     'AS',
-    'MUTATION',
+    'MUTATE',
     'GQL',
 )
 
@@ -95,7 +95,9 @@ class ResolvedBinding(NamedTuple):
 
 class GraphQLQuery(NamedTuple):
     query: str
+    name: str
     get_input_vars: Callable[..., Mapping[str, Any]]
+    get_result: Callable[[Mapping[str, Any]], Any]
 
 
 class GraphQLQueryConstructor(NamedTuple):
@@ -104,12 +106,15 @@ class GraphQLQueryConstructor(NamedTuple):
 
     def __call__(self, expr: 'Expr') -> GraphQLQuery:
         mk_input_vars, dict_input_vars = self.typer ^ expr.input
+        mk_result, dict_result = self.typer ^ expr.query
         bindings = self.prepare_bindings(expr)
         query_decl = expr.type.value
         query_body = translate(expr.query, bindings, self.typer)
         return GraphQLQuery(
+            name=expr.query.__name__,
             query=f'{query_decl} {query_body}',
             get_input_vars=dict_input_vars,
+            get_result=lambda x: mk_result(x['data']),
         )
 
     def prepare_bindings(self, expr: Expr) -> Mapping[str, Iterable[ResolvedBinding]]:
@@ -162,8 +167,8 @@ class Query(NamedTuple):
         return Expr(type=self.type, query=other)
 
 
-QUERY = Query(QueryType.QUERY)
-MUTATION = Query(QueryType.MUTATION)
+QUERY  = Query(QueryType.QUERY)
+MUTATE = Query(QueryType.MUTATION)
 
 
 @infix

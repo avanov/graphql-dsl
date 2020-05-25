@@ -1,7 +1,7 @@
 interactions:
 - request:
-    body: '{"operationName": "CountriesQuery", "variables": {}, "query": "query CountriesQuery
-      {countries{code name languages{code name } } }"}'
+    body: '{"operationName": "CountriesQuery", "variables": {}, "query": "query CountriesQuery{countries{code
+      name languages{code name}}}"}'
     headers:
       Accept:
       - application/json
@@ -10,11 +10,9 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '132'
+      - '128'
       Content-Type:
       - application/json
-      Origin:
-      - https://countries.trevorblades.com
       User-Agent:
       - python-requests/2.23.0
     method: POST
@@ -412,7 +410,7 @@ interactions:
       Content-Type:
       - application/json; charset=utf-8
       Date:
-      - Sat, 23 May 2020 22:42:28 GMT
+      - Mon, 25 May 2020 21:15:56 GMT
       Etag:
       - W/"5b6b-d1+62eE1I7PMiWAV7I5FC0xGL7c"
       Server:

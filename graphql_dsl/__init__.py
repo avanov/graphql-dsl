@@ -6,7 +6,7 @@ __all__ = (
     'QUERY',
     'WITH',
     'PASS',
-    'MUTATION',
+    'MUTATE',
     'TO',
     'AS',
     'GQL',

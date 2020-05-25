@@ -7,8 +7,11 @@
 graphql-dsl
 ===========
 
-Compose GraphQL queries by defining Python types
-------------------------------------------------
+.. contents::
+   :local:
+
+Quick intro
+===========
 
 Let's take a manually written `GraphQL query <https://graphql.org/learn/schema/#the-query-and-mutation-types>`_:
 
@@ -85,8 +88,65 @@ field reference syntax (because dataclasses don't define class-level field gette
            | PASS  | (Input, 'droid_id') * TO * (HeroAndDroid, 'droid') * AS * 'id'
            )
 
-Indices and tables
-==================
+Simple queries
+--------------
+
+Let's use `Countries API <https://countries.trevorblades.com/>`_ and prepare the simplest query for it.
+
+We want to fetch a list of all country codes
+
+.. code-block:: python
+
+    from typing import Sequence, NamedTuple
+
+    class Country(NamedTuple):
+        code: str
+
+    class Query(NamedTuple):
+        countries: Sequence[Country]
+
+We can start composing our query with:
+
+.. code-block:: python
+
+    from graphql_dsl import QUERY
+
+    countries_query = QUERY | Query
+
+
+If we don't need to provide input parameters to the query, we can immediately compile it:
+
+.. code-block:: python
+
+    from graphql_dsl import GQL
+
+    compiled_query = GQL(countries_query)
+
+
+Now we are able to call the service and receive the typed result from it:
+
+.. code-block:: python
+
+    import requests
+
+    response = requests.post(
+        url="https://countries.trevorblades.com/",
+        json={
+            "operationName": compiled_query.name,
+            "query": compiled_query.query,
+        }
+    )
+
+    data = compiled_query.get_result(response)
+    assert isinstance(data, Query)
+
+    # will print AD, AE, AF, AG, AI, AL, AM, AO, ...
+    print(', '.join(country.code for country in data.countries))
+
+
+
+Documentation Indices and tables
+================================
 
 * :ref:`genindex`
 * :ref:`modindex`
