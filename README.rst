@@ -33,7 +33,7 @@ Compose GraphQL queries by defining Python types
 
 Let's take a manually written `GraphQL query <https://graphql.org/learn/schema/#the-query-and-mutation-types>`_:
 
-.. code-block:: graphql
+.. code-block::
 
     query {
         hero {
