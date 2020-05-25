@@ -21,8 +21,8 @@ with (HERE / 'requirements' / 'minimal.txt').open() as f:
 # ----------------------------
 
 setup(name='graphql-dsl',
-      version='0.1.3',
-      description='GraphQL DSL',
+      version='0.2.0',
+      description='Compose GraphQL queries by composing Python types!',
       long_description=README,
       classifiers=[
           'Development Status :: 1 - Planning',
@@ -51,5 +51,9 @@ setup(name='graphql-dsl',
       test_suite='tests',
       tests_require=['pytest', 'coverage'],
       install_requires=requires,
-      entry_points={}
+      entry_points={
+          'console_scripts': [
+              'graphql-dsl = graphql_dsl.cli:main'
+          ],
+      }
     )

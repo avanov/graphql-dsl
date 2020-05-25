@@ -24,8 +24,8 @@
     :target: https://pypi.python.org/pypi/graphql-dsl
     :alt: Latest PyPI Release
 
-Compose GraphQL queries by defining Python types
-================================================
+Compose GraphQL queries by composing Python types
+=================================================
 
 .. code-block:: bash
 

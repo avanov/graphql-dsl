@@ -1,44 +1,49 @@
-with (import (builtins.fetchTarball {
-  # Descriptive name to make the store path easier to identify
-  name = "graphql-dsl-python38";
-  # Commit hash for nixos-unstable as of 2019-10-27
-  url = https://github.com/NixOS/nixpkgs-channels/archive/f601ab37c2fb7e5f65989a92df383bcd6942567a.tar.gz;
-  # Hash obtained using `nix-prefetch-url --unpack <url>`
-  sha256 = "0ikhcmcc29iiaqjv5r91ncgxny2z67bjzkppd3wr1yx44sv7v69s";
-}) {});
+{
+    pkgs ? import (builtins.fetchTarball {
+               # https://nixos.wiki/wiki/FAQ/Pinning_Nixpkgs
+               # Descriptive name to make the store path easier to identify
+               name   = "nixpkgs-unstable-2021-01-20";
+               url    = https://github.com/NixOS/nixpkgs/archive/92c884dfd7140a6c3e6c717cf8990f7a78524331.tar.gz;
+               # hash obtained with `nix-prefetch-url --unpack <archive>`
+               sha256 = "0wk2jg2q5q31wcynknrp9v4wc4pj3iz3k7qlxvfh7gkpd8vq33aa";
+           }) {}
+,   pyVersion ? "39"
+,   isDevEnv  ? true
+}:
 
-let macOsDeps = with pkgs; stdenv.lib.optionals stdenv.isDarwin [
-    darwin.apple_sdk.frameworks.CoreServices
-    darwin.apple_sdk.frameworks.ApplicationServices
-];
+let
+    macOsDeps = with pkgs; stdenv.lib.optionals stdenv.isDarwin [
+        darwin.apple_sdk.frameworks.CoreServices
+        darwin.apple_sdk.frameworks.ApplicationServices
+    ];
+    python = pkgs."python${pyVersion}Full";
+    pythonPkgs = pkgs."python${pyVersion}Packages";
+    devLibs = if isDevEnv then [ pythonPkgs.twine pythonPkgs.wheel ] else [ pythonPkgs.coveralls ];
 
 in
 
 # Make a new "derivation" that represents our shell
-stdenv.mkDerivation {
-    name = "graphql-dsl38";
+pkgs.stdenv.mkDerivation {
+    name = "graphql-dsl39";
 
     # The packages in the `buildInputs` list will be added to the PATH in our shell
     # Python-specific guide:
     # https://github.com/NixOS/nixpkgs/blob/master/doc/languages-frameworks/python.section.md
-    buildInputs = [
+    buildInputs = with pkgs; [
         # see https://nixos.org/nixos/packages.html
         # Python distribution
-        cookiecutter
-        python38Full
-        python38Packages.virtualenv
-        python38Packages.wheel
-        python38Packages.twine
+        python
+        pythonPkgs.virtualenv
+        pythonPkgs.wheel
+        pythonPkgs.twine
         taglib
         ncurses
         libxml2
         libxslt
         libzip
         zlib
-        libressl
+        openssl
 
-        libuv
-        postgresql
         # root CA certificates
         cacert
         which
@@ -49,13 +54,13 @@ stdenv.mkDerivation {
         # to allow package installs from PyPI
         export SOURCE_DATE_EPOCH=$(date +%s)
 
-        VENV_DIR=$PWD/.venv
+        export VENV_DIR="$PWD/.venv${pyVersion}"
 
         export PATH=$VENV_DIR/bin:$PATH
         export PYTHONPATH=""
         export LANG=en_US.UTF-8
 
-        export PIP_CACHE_DIR=$PWD/.local/pip-cache
+        export PIP_CACHE_DIR="$PWD/.local/pip-cache${pyVersion}"
 
         # Setup virtualenv
         if [ ! -d $VENV_DIR ]; then
@@ -67,6 +72,6 @@ stdenv.mkDerivation {
 
         # Dirty fix for Linux systems
         # https://nixos.wiki/wiki/Packaging/Quirks_and_Caveats
-        export LD_LIBRARY_PATH=${stdenv.cc.cc.lib}/lib/:$LD_LIBRARY_PATH
+        export LD_LIBRARY_PATH=${pkgs.stdenv.cc.cc.lib}/lib/:$LD_LIBRARY_PATH
     '';
 }

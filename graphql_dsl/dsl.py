@@ -58,14 +58,25 @@ class Binding(NamedTuple):
     expr_field: FieldReference
     variable_alias: Optional[str] = None
 
-    def __and__(self, other: 'Binding') -> 'BindComb':
-        return BindComb(pvector([self, other]))
+    def __and__(self, other: Union['Binding', 'BindComb']) -> 'BindComb':
+        if isinstance(other, BindComb):
+            return BindComb(pvector([self]).extend(other.bindings))
+        elif isinstance(other, Binding):
+            return BindComb(pvector([self, other]))
+        raise NotImplementedError('Binding???')
 
 
 class BindComb(NamedTuple):
     """ Binding combinator
     """
     bindings: PVector[Binding] = pvector()
+
+    def __and__(self, other: Union['Binding', 'BindComb']) -> 'BindComb':
+        if isinstance(other, BindComb):
+            return self._replace(bindings=self.bindings.extend(other.bindings))
+        elif isinstance(other, Binding):
+            return self._replace(bindings=self.bindings.append(other))
+        raise NotImplementedError('BindComb???')
 
 
 class Unit(NamedTuple):
@@ -121,7 +132,16 @@ class GraphQLQueryConstructor(NamedTuple):
         rv = defaultdict(list)
         for binding in expr.bindings:
             resolved_input = self.resolve_binding(expr.input, binding.input_field, binding.variable_alias)
-            resolved_expr  = self.resolve_binding(expr.query, binding.expr_field, binding.variable_alias)
+            try:
+                resolved_expr  = self.resolve_binding(expr.query, binding.expr_field, binding.variable_alias)
+            except AttrNotFound:
+                for typ in self.typer.memo.keys():
+                    try:
+                        resolved_expr  = self.resolve_binding(typ, binding.expr_field, binding.variable_alias)
+                    except (AttributeError, TypeError, AttrNotFound):
+                        continue
+                    else:
+                        break
             rv[resolved_expr.attr_name].append(resolved_input)
         return rv
 
@@ -134,7 +154,7 @@ class GraphQLQueryConstructor(NamedTuple):
                     variable_python_type = field_type
                     break
             else:
-                raise TypeError(f"Couldn't find a field of alias \"{alias}\" in {typ}")
+                raise AttrNotFound(f"Couldn't find a field of alias \"{alias}\" in {typ}")
 
         elif isinstance(field, tuple):
             # dataclass
@@ -147,7 +167,10 @@ class GraphQLQueryConstructor(NamedTuple):
         overrider = get_global_name_overrider(self.typer.overrides)
         attr_name = overrider(name)
         is_optional = type(None) in inner_type_boundaries(variable_python_type)
-        type_name = GQL_SCALARS.get(variable_python_type, variable_python_type.__name__)
+        try:
+            type_name = GQL_SCALARS.get(variable_python_type, variable_python_type.__name__)
+        except AttributeError:
+            type_name = ''
         return ResolvedBinding(attr_name=overrider(name),
                                input_attr_name=alias if alias else attr_name,
                                type_name=type_name,
@@ -200,3 +223,7 @@ def AS(a: Binding, b: str) -> Binding:
 
 
 GQL = GraphQLQueryConstructor()
+
+
+class AttrNotFound(TypeError):
+    pass

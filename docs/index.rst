@@ -137,7 +137,7 @@ Now we are able to call the service and receive the typed result from it:
         }
     )
 
-    data = compiled_query.get_result(response)
+    data = compiled_query.get_result(response.json())
     assert isinstance(data, Query)
 
     # will print AD, AE, AF, AG, AI, AL, AM, AO, ...
