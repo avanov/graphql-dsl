@@ -88,10 +88,7 @@ servers with GraphQL API
     def call_server(droid_id: ID) -> HeroAndDroid:
         response = requests.post(
             url='https://<graphql-server-url>/',
-            json={ "operationName": q.name
-                 , "variables":     q.get_input_vars(Input(droid_id=droid_id))
-                 , "query":         q.query
-                 },
+            json=q.request_payload(Input(droid_id=droid_id)),
             headers={ 'Content-Type': 'application/json'
                     , 'Accept': 'application/json'
                     }

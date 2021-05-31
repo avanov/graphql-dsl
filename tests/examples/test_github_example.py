@@ -48,9 +48,10 @@ def test_github_query_example():
 
     q = GQL( QUERY | ListIssues
              | WITH  | Input
-             | PASS  | Input.owner          * TO * ListIssues.repository
+             | PASS  | Input.owner  * TO * ListIssues.repository
              & Input.name           * TO * ListIssues.repository
              & Input.numFirstIssues * TO * Repository.issues * AS * 'first'
              )
 
     assert q.query == result.strip()
+    assert isinstance(q.request_payload(Input('avanov', 'graphql-dsl', 5)), dict)
