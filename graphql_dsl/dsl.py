@@ -1,6 +1,6 @@
 from collections import defaultdict
 from enum import Enum
-from typing import NamedTuple, Type, Any, Union, Callable, Mapping, Tuple, get_type_hints, Iterable, Optional
+from typing import NamedTuple, Type, Any, Union, Callable, Mapping, Tuple, get_type_hints, Iterable, Optional, TypeVar
 
 import inflection
 from pyrsistent import pmap, pvector
@@ -104,11 +104,21 @@ class ResolvedBinding(NamedTuple):
     is_optional: bool
 
 
+T = TypeVar('T')
+
+
 class GraphQLQuery(NamedTuple):
     query: str
     name: str
-    get_input_vars: Callable[..., Mapping[str, Any]]
+    get_input_vars: Callable[[T], Mapping[str, Any]]
     get_result: Callable[[Mapping[str, Any]], Any]
+
+    def request_payload(self, query_input: Optional[T] = None) -> Mapping[str, Any]:
+        in_ = self.get_input_vars(query_input) if query_input else {}
+        return { "operationName": self.name
+               , "variables":     in_
+               , "query":         self.query
+               }
 
 
 class GraphQLQueryConstructor(NamedTuple):

@@ -21,7 +21,7 @@ with (HERE / 'requirements' / 'minimal.txt').open() as f:
 # ----------------------------
 
 setup(name='graphql-dsl',
-      version='0.2.0',
+      version='0.2.1',
       description='Compose GraphQL queries by composing Python types!',
       long_description=README,
       classifiers=[

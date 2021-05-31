@@ -32,11 +32,7 @@ def test_tokenizer():
     with vcr.use_cassette(str(VCR_FIXTURES_PATH / 'countries.yaml')):
         response = requests.post(
             url='https://countries.trevorblades.com/',
-            json={
-                "operationName": graphql_query.name,
-                "variables": {},
-                "query": graphql_query.query,
-            },
+            json=graphql_query.request_payload(),
             headers={
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',

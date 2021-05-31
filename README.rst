@@ -31,7 +31,7 @@ Compose GraphQL queries by composing Python types
 
     pip install graphql-dsl
 
-Let's take a manually written `GraphQL query <https://graphql.org/learn/schema/#the-query-and-mutation-types>`_:
+Let's take a manually written `GraphQL query from the official docs <https://graphql.org/learn/schema/#the-query-and-mutation-types>`_:
 
 .. code-block::
 
@@ -75,6 +75,29 @@ With ``graphql-dsl`` you can construct a similar query with the following Python
 and the output will be::
 
     query HeroAndDroid($droidId:ID!){hero{name}droid(id:$droidId){name}}
+
+The value of ``q.query`` is a GraphQL query template that should be used with instances of ``Input`` to call
+servers with GraphQL API
+
+.. code-block:: python
+
+    import requests
+
+    q = GQL(...)
+
+    def call_server(droid_id: ID) -> HeroAndDroid:
+        response = requests.post(
+            url='https://<graphql-server-url>/',
+            json=q.request_payload(Input(droid_id=droid_id)),
+            headers={ 'Content-Type': 'application/json'
+                    , 'Accept': 'application/json'
+                    }
+        )
+        response.raise_for_status()
+        return q.get_result(response.json())
+
+Note that the query `q` resides at the top-level module scope, as the query constructor doesn't depend on the
+query's input values, it only needs to know about the shapes of input and output data.
 
 The query builder supports both ``NamedTuple`` and ``@dataclass`` types, yet the latter has a slightly different
 field reference syntax (because dataclasses don't define class-level field getters):
